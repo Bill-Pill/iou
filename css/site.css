@@ -1,8 +1,11 @@
 :root {
-    --primary-color: #6d9eeb;
-    --secondary-color: #EBBA6D;
+    --primary-color: #118C4F;
+    --secondary-color: #A59C61;
     --dark-color: #424242;
     --white-color: #BDBDBD;
+}
+
+.logoFont {
 }
 
 body {
