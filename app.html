@@ -61,19 +61,19 @@
                         <div class="row">
                             <label for="loanValue" class="col-6 col-form-label">Loan Amount</label><br>
                             <div class="col-6">
-                                <input id="loanValue" class="form-control" type="number" aria-label="" required><br>
+                                <input id="loanValue" class="form-control" type="number" value="25000" aria-label="Loan Amount" required><br>
                             </div>
                         </div>
                         <div class="row">
                             <label for="termValue" class="col-6 col-form-label">Term (months)</label><br>
                             <div class="col-6">
-                                <input id="termValue" class="form-control" type="number" aria-label="" required><br>
+                                <input id="termValue" class="form-control" type="number" value="60" aria-label="Term (months)" required><br>
                             </div>
                         </div>
                         <div class="row">
-                            <label for="interestValue" class="col-6 col-form-label">Interest Rate</label><br>
+                            <label for="interestValue" class="col-6 col-form-label">Interest Rate(%)</label><br>
                             <div class="col-6">
-                                <input id="interestValue" class="form-control" type="number" aria-label="" required><br>
+                                <input id="interestValue" class="form-control" type="number" value="5" aria-label="Interest Rate(%)" required><br>
                             </div>
                         </div>
                         <div class="row">
@@ -153,7 +153,7 @@
         </div>
     </footer>
 
-    <template id="resultsTemplate">
+    <template id="paymentsTemplate">
         <tr>
             <td></td>
             <td></td>
@@ -169,6 +169,9 @@
         integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous">
     </script>
     <script src="js/site.js"></script>
+    <script>
+        document.getElementById("btnSubmit").addEventListener("click", getValues)
+    </script>
 </body>
 
 </html>
