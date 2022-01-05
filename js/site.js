@@ -1,10 +1,13 @@
 // Get and verify input values
 function getValues() {
+    // Hide totals/payments to start
+    document.getElementById("totals").classList.add("invisible");
+    document.getElementById("payments").classList.add("invisible");
+
+    // Get inputs and parse float
     let loanValue = document.getElementById("loanValue").value;
     let termValue = document.getElementById("termValue").value;
     let interestValue = document.getElementById("interestValue").value;
-
-    // Convert float/integer
     loanValue = parseFloat(loanValue);
     termValue = parseFloat(termValue);
     interestValue = parseFloat(interestValue);
@@ -12,9 +15,10 @@ function getValues() {
     // Validate inputs as numbers
     if (Number.isFinite(loanValue) && Number.isInteger(termValue) && Number.isFinite(interestValue)) {
         // Call calculate function
-        let returnObjArr = calcPayments(loanValue, termValue, interestValue);
-        // output function
-        displayPayments(returnObjArr);
+        let returnObj = calcPayments(loanValue, termValue, interestValue);
+        // Call output functions
+        displayPayments(returnObj);
+        displayTotals(returnObj, loanValue);
     } else {
         alert("Incorrect input(s). Please enter numbers for all values(Term must be an integer)")
     }
@@ -32,8 +36,7 @@ function calcPayments(loan, term, interest) {
     let principalPayment = 0;
     let totalInterest = 0;
 
-
-    // Loop for m months
+    // Push paymentObj for each m month
     for (let month = 1; month <= term; month++) {
         interestPayment = remainingBalance * interest / 1200;
         principalPayment = totalMonthlyPay - interestPayment;
@@ -50,31 +53,68 @@ function calcPayments(loan, term, interest) {
         paymentObjArr.push(paymentObj);
 
     };
+    // Return payment details for each month. Include monthly pay for display functions
     let returnObj = {
         paymentObjArr, totalMonthlyPay
-
     };
     return returnObj;
 }
 
-// Output results
-function displayPayments(returnObjArr) {
+// Number formatter for display outputs
+const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  });
+
+// Output payments
+function displayPayments(returnObj) {
     // Get table body
     let tableBody = document.getElementById("results");
 
     // Get template row
     let templateRow = document.getElementById("paymentsTemplate");
 
-    let payment = returnObjArr.totalMonthlyPay;
-    let paymentObjArr = returnObjArr.paymentObjArr;
+    // Clear table
+    tableBody.innerHTML= "";
 
+    // Deconstruct returnObj
+    let payment = returnObj.totalMonthlyPay;
+    let paymentObjArr = returnObj.paymentObjArr;
+    
+    // Loop over each month/element of paymentObjArr and populate payments table
     for (let i = 0; i < paymentObjArr.length; i++) {
         let tableRow = document.importNode(templateRow.content, true);
         let rowCols = tableRow.querySelectorAll("td");
 
-        rowCols[0].textContent = payment;
+        // Format and populate values to table columns in current row
+        let currentPaymentObj = paymentObjArr[i];
+        rowCols[0].textContent = currentPaymentObj.month;
+        rowCols[1].textContent = `${formatter.format(payment)}`;
+        rowCols[2].textContent = `${formatter.format(currentPaymentObj.principalPayment)}`;
+        rowCols[3].textContent = `${formatter.format(currentPaymentObj.interestPayment)}`;
+        rowCols[4].textContent = `${formatter.format(currentPaymentObj.totalInterest)}`;
+        rowCols[5].textContent = `${formatter.format(currentPaymentObj.remainingBalance)}`;
 
         // Apply TDs to current row on page
         tableBody.appendChild(tableRow);
     }
+    // Show payments section
+    document.getElementById("payments").classList.remove("invisible");
+}
+
+// Output totals to page
+function displayTotals (returnObj, totalPrincipal) {
+    // Get values to display
+    let totalMonthlyPay = returnObj.totalMonthlyPay;
+    let finalPaymentObj = returnObj.paymentObjArr.pop();
+    let totalInterest = finalPaymentObj.totalInterest;
+    let totalCost = totalPrincipal + totalInterest;
+
+    // Populate and format values to totals
+    document.getElementById("monthlyPayment").innerHTML = `${formatter.format(totalMonthlyPay)}`;
+    document.getElementById("totalPrincipal").innerHTML = `${formatter.format(totalPrincipal)}`;
+    document.getElementById("totalInterest").innerHTML = `${formatter.format(totalInterest)}`;
+    document.getElementById("totalCost").innerHTML = `${formatter.format(totalCost)}`;
+    // Show totals section
+    document.getElementById("totals").classList.remove("invisible");
 }

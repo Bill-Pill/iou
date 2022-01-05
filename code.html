@@ -58,17 +58,139 @@
                 <div class="col-lg-8">
                     <pre class="line-numbers">
                         <code class="language-javascript">
-                            //Call Hello World
-                            function helloWorld(){
-                                alert("Hey World!");
-                            }
+                            // Get and verify input values
+function getValues() {
+    // Hide totals/payments to start
+    document.getElementById("totals").classList.add("invisible");
+    document.getElementById("payments").classList.add("invisible");
+
+    // Get inputs and parse float
+    let loanValue = document.getElementById("loanValue").value;
+    let termValue = document.getElementById("termValue").value;
+    let interestValue = document.getElementById("interestValue").value;
+    loanValue = parseFloat(loanValue);
+    termValue = parseFloat(termValue);
+    interestValue = parseFloat(interestValue);
+
+    // Validate inputs as numbers
+    if (Number.isFinite(loanValue) && Number.isInteger(termValue) && Number.isFinite(interestValue)) {
+        // Call calculate function
+        let returnObj = calcPayments(loanValue, termValue, interestValue);
+        // Call output functions
+        displayPayments(returnObj);
+        displayTotals(returnObj, loanValue);
+    } else {
+        alert("Incorrect input(s). Please enter numbers for all values(Term must be an integer)")
+    }
+}
+
+// Perform calculations
+function calcPayments(loan, term, interest) {
+    // Get monthly payments
+    let totalMonthlyPay = loan * (interest / 1200) / (1 - (1 + interest / 1200) ** (-term))
+
+    // Set initial values
+    let paymentObjArr = [];
+    let remainingBalance = loan;
+    let interestPayment = 0;
+    let principalPayment = 0;
+    let totalInterest = 0;
+
+    // Push paymentObj for each m month
+    for (let month = 1; month <= term; month++) {
+        interestPayment = remainingBalance * interest / 1200;
+        principalPayment = totalMonthlyPay - interestPayment;
+        remainingBalance -= principalPayment
+        totalInterest += interestPayment
+
+        let paymentObj = {
+            month,
+            principalPayment,
+            interestPayment,
+            totalInterest,
+            remainingBalance
+        };
+        paymentObjArr.push(paymentObj);
+
+    };
+    // Return payment details for each month. Include monthly pay for display functions
+    let returnObj = {
+        paymentObjArr, totalMonthlyPay
+    };
+    return returnObj;
+}
+
+// Number formatter for display outputs
+const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  });
+
+// Output payments
+function displayPayments(returnObj) {
+    // Get table body
+    let tableBody = document.getElementById("results");
+
+    // Get template row
+    let templateRow = document.getElementById("paymentsTemplate");
+
+    // Clear table
+    tableBody.innerHTML= "";
+
+    // Deconstruct returnObj
+    let payment = returnObj.totalMonthlyPay;
+    let paymentObjArr = returnObj.paymentObjArr;
+    
+    // Loop over each month/element of paymentObjArr and populate payments table
+    for (let i = 0; i < paymentObjArr.length; i++) {
+        let tableRow = document.importNode(templateRow.content, true);
+        let rowCols = tableRow.querySelectorAll("td");
+
+        // Format and populate values to table columns in current row
+        let currentPaymentObj = paymentObjArr[i];
+        rowCols[0].textContent = currentPaymentObj.month;
+        rowCols[1].textContent = `${formatter.format(payment)}`;
+        rowCols[2].textContent = `${formatter.format(currentPaymentObj.principalPayment)}`;
+        rowCols[3].textContent = `${formatter.format(currentPaymentObj.interestPayment)}`;
+        rowCols[4].textContent = `${formatter.format(currentPaymentObj.totalInterest)}`;
+        rowCols[5].textContent = `${formatter.format(currentPaymentObj.remainingBalance)}`;
+
+        // Apply TDs to current row on page
+        tableBody.appendChild(tableRow);
+    }
+    // Show payments section
+    document.getElementById("payments").classList.remove("invisible");
+}
+
+// Output totals to page
+function displayTotals (returnObj, totalPrincipal) {
+    // Get values to display
+    let totalMonthlyPay = returnObj.totalMonthlyPay;
+    let finalPaymentObj = returnObj.paymentObjArr.pop();
+    let totalInterest = finalPaymentObj.totalInterest;
+    let totalCost = totalPrincipal + totalInterest;
+
+    // Populate and format values to totals
+    document.getElementById("monthlyPayment").innerHTML = `${formatter.format(totalMonthlyPay)}`;
+    document.getElementById("totalPrincipal").innerHTML = `${formatter.format(totalPrincipal)}`;
+    document.getElementById("totalInterest").innerHTML = `${formatter.format(totalInterest)}`;
+    document.getElementById("totalCost").innerHTML = `${formatter.format(totalCost)}`;
+    // Show totals section
+    document.getElementById("totals").classList.remove("invisible");
+}
                         </code>
                     </pre>
                 </div>
                 <div class="col-lg-4">
                     <p>The dipslayed code shows the JavaScript used for this project. The main functions are outlined below.</p>
-                    <h5>Hello World</h5>
-                    <p>Hello World is a function that displays an alert with a message of "Hey World!"</p>
+                    <h5>getValues</h5>
+                    <p>getValues will trigger when the "Calculate" button is clicked. It grabs our inputs and, after some parsing/validation, passes them as arguments to calcPayments.</p>
+                    <h5>calcPayments</h5>
+                    <p>calcPayments does all of our calculations. We essentially loop through each month, save each month's payment information(interest, principal, etc) in an object, and push that object to an array which will contain each month's payment object. This array along with our monthly payment amount get returned to be used for our display functions below.</p>
+                    <h5>displayPayments</h5>
+                    <p>displayPayments displays all our information from the Payment Object Array using a table with template rows</p>
+                    <h5>displayTotals</h5>
+                    <p>displayTotals takes our total loan amount and the Payment Object for the final month to determine our totals and outputs them.</p>
                 </div>
             </div>
         </div>
